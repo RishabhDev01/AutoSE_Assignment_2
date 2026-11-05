@@ -4,8 +4,9 @@
 The Code Is There. Does the Agent Understand It?
 
 ## Repository
-- Repository URL: To be added after GitHub setup
-- Submission commit: To be added after final commit
+- Repository URL: https://github.com/RishabhDev01/AutoSE_Assignment_2
+- Initial Submission Commit: a2736c5
+- Branch: main
 
 ## Experiment Overview
 This experiment evaluates whether providing an architecture document improves an autonomous coding agent's performance when modifying an existing software project.
