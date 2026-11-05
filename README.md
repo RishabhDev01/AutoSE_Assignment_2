@@ -35,11 +35,42 @@ Three software tasks were evaluated under both conditions, with two trials per t
 - `results/runs/`: Session logs, code diffs, and run notes for each experiment.
 
 ## Reproducing a Run
-1. Prepare a fresh copy of the TinyDB experiment snapshot.
-2. Use the task specification from `experiment/tasks/`.
-3. For Condition A, provide the agent with the source code only.
-4. For Condition B, provide the same source code and `ARCHITECTURE.md`.
-5. Use the agent, model, settings in `experiment/config.md`.
-6. Run the task in a fresh agent session.
-7. Record the session log, final code diff, test output, execution time, and tool-call count.
+
+### 1. Prepare the Repository
+- Start from the TinyDB experiment snapshot at commit `eae18d1`.
+- Create a fresh repository copy for each run.
+- Start a fresh Claude Code session for every run.
+
+### 2. Select the Task and Condition
+- Select the task specification from `experiment/tasks/T1.md`, `T2.md`, or `T3.md`.
+- **Condition A:** Provide the agent with the source code and task specification only.
+- **Condition B:** Provide the same source code and task specification, along with `ARCHITECTURE.md`.
+
+### 3. Configure the Agent
+Use the agent, model, and settings documented in `experiment/config.md`.
+
+For Condition B, additionally include this instruction:
+
+`Read ARCHITECTURE.md before you start.`
+
+Use the same task completion instruction in both conditions:
+
+`When you are done, make sure the existing tests still pass.`
+
+If the agent asks a question, respond:
+
+`Use your best judgement.`
+
+Each run has a 30-minute time limit.
+
+### 4. Record the Results
+Record the following for each run:
+- Session log
+- Final code diff
+- Test output
+- Execution time
+- Tool-call count
+- Token usage, when reported by the agent
+
+The recorded evidence is stored under `results/runs/`, and the consolidated measurements are in `results/results.csv`.
 
