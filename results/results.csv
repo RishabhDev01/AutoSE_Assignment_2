@@ -1,0 +1,13 @@
+run_id,task,condition,trial,outcome,acceptance_passed,acceptance_total,regression_tests_passed,regressions,coverage_percent,design_fit,time_min,tool_calls,input_tokens,output_tokens
+T1_A_1,T1,A,1,Complete,4,4,232,0,94,3,1.49,9,681529,4083
+T1_A_2,T1,A,2,Complete,4,4,233,0,93,3,1.93,9,781426,4080
+T1_B_1,T1,B,1,Complete,4,4,232,0,93,3,1.97,9,828571,3465
+T1_B_2,T1,B,2,Complete,4,4,232,0,94,3,1.75,11,1325115,5911
+T2_A_1,T2,A,1,Partial,1,4,238,0,93,3,1.22,8,527507,4755
+T2_A_2,T2,A,2,Partial,1,4,238,0,93,3,1.12,10,1282447,15575
+T2_B_1,T2,B,1,Partial,1,4,236,0,93,3,1.46,10,789452,5310
+T2_B_2,T2,B,2,Partial,1,4,238,0,93,3,1.17,7,624114,4589
+T3_A_1,T3,A,1,Failed,0,4,250,0,93,3,2.22,10,754017,8738
+T3_A_2,T3,A,2,Failed,0,4,250,0,93,3,1.72,7,758574,8220
+T3_B_1,T3,B,1,Partial,3,4,243,0,93,3,2.58,10,877753,9259
+T3_B_2,T3,B,2,Failed,0,4,249,0,93,3,1.72,8,712744,8442

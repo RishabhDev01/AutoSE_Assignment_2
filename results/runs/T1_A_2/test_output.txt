@@ -1,0 +1,172 @@
+# Run Notes — T1_A_2
+
+## 1. Run Information
+
+| Field | Value |
+|---|---|
+| Run ID | T1_A_2 |
+| Task | T1 — Fix Generator Exhaustion in `one_of()` Queries |
+| Condition | A — Code only (no ARCHITECTURE.md) |
+| Trial | 2 |
+| Agent | Claude Code |
+| Model | Claude Opus 5.5 |
+| Model ID | `claude-opus-5-5` |
+| Claude Code version | 2.1.317 |
+| Thinking effort | Medium |
+| Permission mode | Auto |
+| Environment | Windows 10 Home Single Language |
+| Python version | 3.14.7 |
+| Start time | 01:06:06.994 IST, 5 November 2026 |
+| End time | 01:08:02.916 IST, 5 November 2026 |
+| Elapsed time | 1.93 minutes |
+
+## 2. Task Description
+
+Fix generator exhaustion in TinyDB's `one_of()` query operation.
+
+The implementation should:
+- Support generator inputs.
+- Return all matching documents when searching with a generator.
+- Support repeated evaluation of the same query.
+- Maintain consistent equality and hashing between equivalent generator-based and list-based queries.
+- Preserve existing behaviour for other collection types.
+
+## 3. Agent Implementation Summary
+
+The agent identified that generators are one-shot iterators. Once consumed, subsequent membership checks operate on an exhausted generator.
+
+The agent modified:
+
+- `tinydb/queries.py`
+- `tests/test_queries.py`
+- `tests/test_tinydb.py`
+
+### Implementation approach
+
+- Changed the `one_of()` parameter annotation from `list[Any]` to `Iterable[Any]`.
+- Imported `Iterable` and `Iterator`.
+- Added a check to identify iterator inputs.
+- Materialized iterator inputs into a list once.
+- Reused the materialized list for membership checks and query freezing.
+
+Conceptually:
+
+```python
+if isinstance(items, Iterator):
+    items = list(items)
+```
+
+This prevents repeated generator exhaustion and allows consistent query identity and hashing.
+
+### Tests added by the agent
+
+- `test_one_of_generator`
+- `test_one_of_generator_equals_list`
+- `test_one_of_unhashable_items`
+- `test_search_one_of_generator`
+
+## 4. Execution Measurements
+
+### Tool usage
+
+| Tool | Calls |
+|---|---:|
+| Bash | 8 |
+| Grep | 1 |
+| Dedicated Read | 0 |
+| Dedicated Edit | 0 |
+| Session wrap-up | 1 |
+| Total tool-use events | 10 |
+
+Assignment-defined tool calls (Bash + Grep): **9**
+
+Note: File inspection and modification were performed through Bash commands rather than dedicated Read or Edit tools.
+
+### Token usage
+
+| Metric | Tokens |
+|---|---:|
+| Regular input tokens | 22 |
+| Cache creation input tokens | 28,121 |
+| Cache read input tokens | 753,283 |
+| Total input tokens | 781,426 |
+| Output tokens | 4,080 |
+| Combined input and output | 785,506 |
+
+Monetary cost was not reported in the transcript.
+
+## 5. Hidden Acceptance Test Results
+
+Private acceptance test file: `test_t1.py`
+
+| Acceptance test | Result |
+|---|---|
+| Generator search returns all documents | PASSED |
+| Repeated evaluation and cached search | PASSED |
+| Generator and list query identity | PASSED |
+| Existing `one_of()` behaviour | PASSED |
+
+**Acceptance result: 4/4 passed (100%).**
+
+Execution time: 0.16 seconds.
+
+## 6. Regression Test Results
+
+Command:
+
+```powershell
+uv run py.test -v --cov=tinydb
+```
+
+| Metric | Original baseline | T1_A_2 |
+|---|---:|---:|
+| Tests collected | 228 | 233 |
+| Passed | 228 | 233 |
+| Failed | 0 | 0 |
+| Skipped | 0 | 0 |
+| Coverage | 93% | 93% |
+
+The five additional tests are associated with the agent's changes.
+
+**Regression result: 0 regressions.**
+
+All original tests continued to pass.
+
+## 7. Design Fit Assessment
+
+Three predefined design-fit checks were evaluated.
+
+| Check | Assessment | Score |
+|---|---|---:|
+| C1 — Preserves existing QueryInstance and `_generate_test()` architecture | Yes | 1 |
+| C2 — Handles generators while preserving other collection behaviour | Yes | 1 |
+| C3 — Preserves query identity and hashing through `freeze()` | Yes | 1 |
+
+**Design fit score: 3/3.**
+
+This is a code-based assessment of the implementation.
+
+## 8. Final Outcome
+
+| Evaluation metric | Result |
+|---|---:|
+| Acceptance tests | 4/4 |
+| Original regression tests broken | 0 |
+| Regression suite | 233 passed |
+| Design fit | 3/3 |
+| Execution time | 1.93 minutes |
+| Assignment-defined tool calls | 9 |
+| Total input tokens | 781,426 |
+| Total output tokens | 4,080 |
+
+**Overall outcome: COMPLETE**
+
+The agent successfully implemented the generator exhaustion fix, passed all hidden acceptance tests, and preserved the existing regression suite without introducing observed regressions.
+
+## 9. Evidence Files
+
+- `T1_A_2_session.jsonl` — Full agent session transcript.
+- `T1_A_2_final_diff.txt` — Final Git diff (save separately).
+- `baseline_t1.txt` — Original hidden acceptance baseline.
+- Terminal output — Hidden acceptance and regression test results.
+

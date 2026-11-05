@@ -1,0 +1,159 @@
+# Run Notes — T2_B_1
+
+## 1. Run Information
+
+- **Run ID:** T2_B_1
+- **Task:** T2 — Add a `between()` Query Operation
+- **Condition:** B — Code + Architecture Documentation
+- **Trial:** 1
+- **Agent:** Claude Code
+- **Model:** Claude Opus 5.5
+- **Claude Code Version:** 2.1.317
+- **Permission Mode:** Auto
+- **Environment:** Windows 10
+
+## 2. Task Description
+
+Implement a `between()` query operation in TinyDB that supports range-based comparisons.
+
+The requirements were:
+
+1. Match document values within a specified lower and upper range.
+2. Include both boundaries by default.
+3. Support exclusive range boundaries.
+4. Raise `ValueError` when the lower boundary exceeds the upper boundary.
+5. Raise `TypeError` for incomparable boundaries.
+6. Ensure missing fields and incomparable document values do not match.
+7. Support nested queries, logical combinations, and existing query caching.
+
+The agent was also instructed to read `ARCHITECTURE.md` before implementation.
+
+## 3. Agent Implementation
+
+The agent implemented the `between()` operation in `tinydb/queries.py`, placing it after `__ge__`.
+
+The implemented API is:
+
+`Query().field.between(lower, upper, *, include_lower=True, include_upper=True)`
+
+Implementation details:
+
+- Inclusive boundaries by default.
+- Independent control over lower- and upper-bound inclusion.
+- Validation for invalid and incomparable boundaries.
+- Missing fields and incomparable values return no match.
+- Supports nested query paths.
+- Works with `&`, `|`, `~`, and `any()`.
+- Query cache identity includes the field path, boundaries, and inclusion settings.
+- Preserves the existing separation between query evaluation and table-level caching.
+
+The agent modified two files and ran three commands, according to its completion summary. The implementation also included eight new tests in `test_queries.py` and a README example.
+
+The agent reported that all 236 tests passed and mypy reported no issues.
+
+## 4. Hidden Acceptance Test Results
+
+| Test scenario | Result |
+|---|---|
+| Boundary behaviour | Failed |
+| Query identity and caching | Failed |
+| Nested paths and mapping | Passed |
+| Query composition and table operations | Failed |
+| **Total** | **1/4 passed** |
+
+### Failure Analysis
+
+**Failure 1 — Boundary behaviour**
+
+The evaluator expected:
+
+`Q.x.between(1, 3, inclusive=False)`
+
+The implementation supports separate keyword arguments:
+
+`include_lower` and `include_upper`.
+
+The test therefore failed because of an API parameter mismatch.
+
+**Failure 2 — Query identity and caching**
+
+The evaluator again expected the unsupported `inclusive=False` keyword. The failure occurred before the cache identity assertions could be completed.
+
+**Failure 3 — Query composition and table operations**
+
+The query composition, logical operations, and count assertions passed before the failure.
+
+The evaluator expected `db.remove()` to return document objects. TinyDB's existing API returns document IDs, resulting in:
+
+`TypeError: 'int' object is not subscriptable`
+
+This is an evaluator expectation mismatch with the existing TinyDB API.
+
+## 5. Regression Test Results
+
+The original regression test suite was executed independently.
+
+| Metric | Result |
+|---|---:|
+| Tests passed | 236 |
+| Tests failed | 0 |
+| Tests skipped | 0 |
+| Coverage | 93% |
+| Baseline tests passed | 228 |
+| Additional tests | 8 |
+| Regressions | 0 |
+
+No existing regression failures were observed.
+
+## 6. Design Fit Evaluation
+
+| Design-fit criterion | Score |
+|---|---:|
+| Implemented within the existing query architecture in `queries.py` | 1 |
+| Reused existing query evaluation and composition mechanisms | 1 |
+| Integrated with existing query caching and identity mechanisms | 1 |
+| **Total** | **3/3** |
+
+The implementation followed the documented architecture by keeping query evaluation in `queries.py` and leaving caching responsibilities with the table layer.
+
+## 7. Performance and Agent Effort
+
+| Metric | Result |
+|---|---:|
+| Execution time | 1.46 minutes |
+| Tool calls | 10 |
+| Input tokens | 789,452 |
+| Output tokens | 5,310 |
+| Combined tokens | 794,762 |
+
+### Tool-call breakdown
+
+| Tool | Calls |
+|---|---:|
+| Bash | 6 |
+| Read | 2 |
+| Edit | 2 |
+| **Total** | **10** |
+
+Planning and wrap-up events were excluded from the tool-call count.
+
+### Input token breakdown
+
+| Token category | Count |
+|---|---:|
+| Regular input tokens | 20 |
+| Cache creation input tokens | 38,538 |
+| Cache read input tokens | 750,894 |
+| **Total input tokens** | **789,452** |
+
+## 8. Final Outcome
+
+**Outcome: PARTIAL**
+
+The agent successfully implemented the `between()` query operation within TinyDB's existing architecture. It achieved a design-fit score of 3/3, and all 236 regression tests passed with 93% coverage.
+
+However, only one of the four hidden acceptance test scenarios passed.
+
+Two failures were caused by the evaluator expecting a different boundary argument (`inclusive=False`) than the implementation's documented separate inclusion flags. The third failure resulted from the evaluator expecting document objects from TinyDB's `remove()` method, whereas the existing API returns document IDs.
+
+These evaluator/API mismatches are recorded as interpretation caveats. The final outcome remains **PARTIAL**, based on the predefined acceptance-test scoring method.

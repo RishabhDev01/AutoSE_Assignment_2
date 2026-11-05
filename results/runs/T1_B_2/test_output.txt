@@ -1,0 +1,199 @@
+# Run Notes – T1_B_2
+
+## 1. Experiment Information
+
+| Field | Value |
+|---|---|
+| Run ID | T1_B_2 |
+| Task | T1 – Fix Generator Exhaustion in `one_of()` Queries |
+| Condition | B – Code + ARCHITECTURE.md |
+| Trial | 2 |
+| Agent | Claude Code |
+| Model | Claude Opus 5.5 |
+| Model ID | `claude-opus-5-5` |
+| Claude Code Version | 2.1.317 |
+| Thinking Effort | Medium |
+| Permission Mode | Auto |
+| Operating System | Windows 10 |
+| Shell | PowerShell and Bash |
+| Worktree | Disabled |
+
+## 2. Architecture Document Usage
+
+The agent read `ARCHITECTURE.md` in its first Bash command before modifying the source code.
+
+The architecture document was available to the agent under Condition B.
+
+## 3. Implementation Summary
+
+**Files modified:**
+- `tinydb/queries.py`
+- `tests/test_queries.py`
+- `tests/test_tinydb.py`
+
+**Implementation approach:**
+
+- Changed the `one_of()` type hint from `list[Any]` to `Iterable[Any]`.
+- Imported `Iterable` from `collections.abc`.
+- Used `iter(items) is items` to identify one-shot iterators.
+- Materialized one-shot iterators into a list before creating the query predicate and query identity.
+- Preserved support for unhashable candidates by using a list instead of a set.
+- Preserved existing behaviour for reusable iterables.
+
+**Core implementation:**
+
+```python
+if iter(items) is items:
+    # One-shot iterators (e.g. generators) would be exhausted after
+    # the first membership test.
+    items = list(items)
+
+return self._generate_test(
+    lambda value: value in items,
+    ('one_of', self._path, freeze(items))
+)
+```
+
+## 4. Tests Added
+
+### tests/test_queries.py
+
+Three test functions were added:
+
+- `test_one_of_generator`
+- `test_one_of_generator_equals_list`
+- `test_one_of_unhashable_items`
+
+These cover repeated generator evaluation, equality and hashing, cacheability, and unhashable candidates.
+
+### tests/test_tinydb.py
+
+One database-level test was added:
+
+- `test_search_one_of_generator`
+
+It checks repeated database searches, cached and uncached searches, and equivalent list-based query results.
+
+**Total new test functions: 4.**
+
+## 5. Agent Tool Usage
+
+| Tool | Calls |
+|---|---:|
+| Bash | 10 |
+| Edit | 1 |
+| Update plan | 1 |
+| Wrap-up | 1 |
+| **Total tool-use events** | **13** |
+
+Assignment-defined tool calls: **11** (10 Bash command executions + 1 dedicated Edit call).
+
+Planning and wrap-up calls are excluded from the assignment tool-call metric.
+
+## 6. Execution Time
+
+| Event | Timestamp (IST) |
+|---|---|
+| Prompt submitted | 02:17:05.425, 5 Nov 2026 |
+| Final response | 02:18:50.482, 5 Nov 2026 |
+| Elapsed time | **1.75 minutes** |
+
+## 7. Token Usage
+
+Token counts were calculated from unique assistant message IDs in the session transcript.
+
+| Token category | Count |
+|---|---:|
+| Regular input tokens | 36 |
+| Cache creation input tokens | 57,799 |
+| Cache read input tokens | 1,267,280 |
+| **Total input tokens** | **1,325,115** |
+| Output tokens | 5,911 |
+| **Combined input + output** | **1,331,026** |
+
+Monetary cost was not reported in the transcript.
+
+## 8. Test Results
+
+### Agent-reported test result
+
+The agent reported:
+
+- 231 passed
+- 1 skipped
+
+The tests were run in a temporary virtual environment because pytest was not installed for the system Python.
+
+### Independent hidden acceptance tests
+
+Command:
+
+```powershell
+uv run pytest -v "C:\Users\risha\Desktop\AutoSE_Private_Evaluator\evaluator\hidden_tests\test_t1.py"
+```
+
+| Acceptance test | Result |
+|---|---|
+| Generator search returns all documents | PASS |
+| Repeated evaluation and cached search | PASS |
+| Generator and list query identity | PASS |
+| Existing `one_of()` behaviour | PASS |
+| **Total** | **4/4 passed** |
+
+Execution time: 0.15 seconds.
+
+### Independent regression tests
+
+Command:
+
+```powershell
+uv run py.test -v --cov=tinydb
+```
+
+| Metric | Original baseline | T1_B_2 |
+|---|---:|---:|
+| Passed | 228 | 232 |
+| Failed | 0 | 0 |
+| Skipped | 0 | 0 |
+| Coverage | 93% | 94% |
+
+- Regressions detected: 0
+- Final test execution time: 2.26 seconds.
+- Four additional passing tests are present in the final suite.
+
+## 9. Design Fit Evaluation
+
+Three predefined design-fit checks were evaluated against the final Git diff.
+
+| Check | Evaluation | Score |
+|---|---|---:|
+| C1 – Preserves existing QueryInstance and Query architecture | PASS | 1 |
+| C2 – Supports generators without changing reusable iterable behaviour | PASS | 1 |
+| C3 – Preserves existing query identity and hashing mechanism | PASS | 1 |
+| **Total** | | **3/3** |
+
+The implementation uses the existing `_generate_test()` and `freeze()` mechanisms instead of introducing a separate query architecture.
+
+## 10. Final Outcome
+
+**Outcome: COMPLETE**
+
+| Evaluation metric | Result |
+|---|---:|
+| Acceptance score | 4/4 |
+| Regression tests passed | 232 |
+| Regressions | 0 |
+| Code coverage | 94% |
+| Execution time | 1.75 minutes |
+| Assignment tool calls | 11 |
+| Combined tokens | 1,331,026 |
+| Design fit | 3/3 |
+
+The agent successfully fixed generator exhaustion in `one_of()` queries. All four hidden acceptance tests passed, all 232 regression tests passed, and no regressions were detected.
+
+## 11. Evidence Files
+
+- `T1_B_2_session.jsonl` – Full Claude Code session transcript.
+- `T1_B_2_regression_tests.txt` – Independent regression test output.
+- `T1_B_2_final.diff` – Final implementation diff.
+- Private evaluator output – Hidden acceptance test results. Keep outside the agent workspace.

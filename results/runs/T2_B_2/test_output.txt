@@ -1,0 +1,144 @@
+# Run Notes — T2_B_2
+
+## 1. Run Information
+
+| Field | Details |
+|---|---|
+| Run ID | T2_B_2 |
+| Task | T2 — Add a `between()` Query Operation |
+| Condition | B — With ARCHITECTURE.md |
+| Trial | 2 |
+| Agent | Claude Code |
+| Model | claude-opus-5-5 |
+| Claude Code Version | 2.1.317 |
+| Permission Mode | Auto |
+| Operating System | Windows 10 |
+| Session ID | c6ed3907-c248-475f-8ef5-f46d48382e4c |
+
+## 2. Task Prompt
+
+Implement a `between()` query operation in TinyDB.
+
+The operation should support range queries with inclusive boundaries by default, optional exclusive boundaries, validation for invalid or incomparable bounds, and integration with existing query composition and caching.
+
+When you are done, make sure the existing tests still pass.
+
+Condition B instruction: Read `ARCHITECTURE.md` before you start.
+
+## 3. Architecture Document Usage
+
+- The agent read `ARCHITECTURE.md` in its first Bash command.
+- The agent used the existing architecture as context before implementation.
+
+## 4. Implementation Summary
+
+The agent implemented `between()` in `tinydb/queries.py`, after the existing `one_of()` operation.
+
+The implemented API was:
+
+```python
+Query().field.between(
+    lower,
+    upper,
+    include_lower=True,
+    include_upper=True
+)
+```
+
+The implementation supports:
+- Inclusive lower and upper boundaries by default.
+- Optional exclusion of either boundary.
+- Integration with the existing query architecture.
+
+Files changed:
+- `tinydb/queries.py`
+- `tests/test_queries.py`
+- `tests/test_tables.py`
+
+`ARCHITECTURE.md` remained an untracked reference document, as expected.
+
+## 5. Execution Metrics
+
+| Metric | Result |
+|---|---:|
+| Elapsed time | 1.17 minutes |
+| Bash calls | 6 |
+| Edit calls | 1 |
+| Total counted tool calls | 7 |
+| Regular input tokens | 16 |
+| Cache creation input tokens | 35,828 |
+| Cache read input tokens | 588,270 |
+| **Total input tokens** | **624,114** |
+| Output tokens | 4,589 |
+| **Combined tokens** | **628,703** |
+
+Token totals count each unique assistant message ID once to avoid duplicate transcript entries.
+
+## 6. Hidden Acceptance Test Results
+
+**Outcome: 1/4 tests passed — Partial**
+
+| Acceptance test | Result | Observation |
+|---|---|---|
+| Boundary behaviour | Failed | Evaluator expects `inclusive=False`; implementation uses `include_lower` and `include_upper`. |
+| Query identity and cache | Failed | Same API parameter mismatch. |
+| Nested paths and mapping | Passed | Functionality works. |
+| Query composition and table operations | Failed | Evaluator expects documents from `remove()`, whereas TinyDB returns document IDs. |
+
+### Evaluator observations
+
+Two tests expect an `inclusive` parameter, while the implementation exposes independent `include_lower` and `include_upper` parameters.
+
+The table-operation test expects `remove()` to return document objects. However, TinyDB's existing API returns document IDs. This expectation is inconsistent with the existing project behaviour.
+
+These compatibility issues are recorded separately rather than treated as regressions in the original test suite.
+
+## 7. Regression Test Results
+
+**Outcome: All regression tests passed.**
+
+| Metric | Result |
+|---|---:|
+| Tests collected | 238 |
+| Passed | 238 |
+| Failed | 0 |
+| Skipped | 0 |
+| Coverage | 93% |
+| Baseline passing tests | 228 |
+| Additional tests | 10 |
+| Regressions | 0 |
+
+The implementation passed the complete regression suite without breaking existing tests.
+
+## 8. Design Fit Evaluation
+
+| ID | Design-fit check | Score |
+|---|---|---:|
+| T2-C1 | Is the new query operation implemented within the existing query architecture in queries.py? | 1 |
+| T2-C2 | Does it reuse the existing query evaluation and composition mechanisms rather than introducing a separate search system? | 1 |
+| T2-C3 | Does it integrate with the existing query caching and identity mechanisms? | 1 |
+| | **Total** | **3/3** |
+
+## 9. Final Outcome
+
+**Overall outcome: PARTIAL**
+
+- Hidden acceptance: 1/4 passed.
+- Regression tests: 238 passed, 0 failed.
+- Regressions: 0.
+- Design fit: 3/3.
+- Execution time: 1.17 minutes.
+- Total counted tool calls: 7.
+- Combined tokens: 628,703.
+
+The agent successfully implemented the feature within the existing TinyDB architecture and preserved the original regression suite.
+
+The partial acceptance result is primarily associated with evaluator/API expectation mismatches. These should be considered when interpreting the experiment results.
+
+## 10. Files to Preserve
+
+- `T2_B_2_session.jsonl`
+- `T2_B_2_diff.patch`
+- `run_notes.txt`
+
+No Git commit was made.

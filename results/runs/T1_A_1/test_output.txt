@@ -1,0 +1,241 @@
+﻿# Run Notes – T1_A_1
+
+## 1. Run Information
+
+| Field | Value |
+|---|---|
+| Run ID | T1_A_1 |
+| Task | T1 – Fix Generator Exhaustion in `one_of()` Queries |
+| Condition | A – Code only |
+| Trial | 1 |
+| Agent | Claude Code |
+| Model | Claude Opus 5.5 (`claude-opus-5-5`) |
+| Claude Code version | 2.1.317 |
+| Thinking effort | Medium |
+| Permission mode | Auto |
+| Environment | Windows 10, PowerShell |
+| Repository | TinyDB |
+| Architecture document | Not provided |
+
+## 2. Task Given to Agent
+
+Fix the generator exhaustion issue in TinyDB's `one_of()` query operation.
+
+The agent was instructed to:
+
+- Implement the requested fix.
+- Add or update relevant tests.
+- Ensure existing tests continue to pass.
+
+The agent received the task specification followed by:
+
+> When you are done, make sure the existing tests still pass.
+
+No additional hints were provided.
+
+## 3. Files Modified by the Agent
+
+The Git status command confirmed two modified tracked files:
+
+| File | Change |
+|---|---|
+| `tests/test_queries.py` | Added four test functions |
+| `tinydb/queries.py` | Updated `one_of()` to handle iterators |
+
+### Implementation change
+
+The agent imported `Iterator` from `collections.abc` and materialized iterator inputs into a list before creating the query.
+
+This prevents a generator from being consumed during hashing and then becoming empty during query evaluation.
+
+### Tests added
+
+1. `test_one_of_generator`
+2. `test_one_of_generator_repeated_search`
+3. `test_one_of_generator_list_equivalence`
+4. `test_one_of_unhashable`
+
+These tests cover repeated generator evaluation, repeated database searches, equality and hashing, and unhashable candidates.
+
+## 4. Final Git Status Verification
+
+Command executed inside the `T1_A_1` directory:
+
+```powershell
+git status --short
+```
+
+Output:
+
+```text
+ M tests/test_queries.py
+ M tinydb/queries.py
+
+
+## 5. Agent Approach
+
+The agent investigated how `one_of()` handles its input values.
+
+It identified that generators are one-shot iterators. When the query was created, the generator could be consumed while preparing the query's hash, leaving no values for subsequent evaluations.
+
+The agent addressed this by converting iterator inputs into a list once, before constructing the query.
+
+It retained list-based membership checking so that unhashable candidates, such as dictionaries and lists, remain supported.
+
+## 6. Testing Performed by the Agent
+
+The agent reported:
+
+```text
+231 passed, 1 skipped
+```
+
+The agent also reported that the four newly added tests failed against the original implementation and passed after the fix.
+
+**Testing environment note:** The agent reported that `pytest` was not installed in the repository environment. It created a temporary virtual environment, installed the required testing packages, and executed the tests there.
+
+Independent verification was performed separately using the experiment's original baseline test command and private acceptance tests.
+
+## 7. Agent Usage and Effort Measurements
+
+Measurements extracted from the Claude Code JSONL transcript:
+
+| Measurement | Count |
+|---|---:|
+| Unique model responses | 9 |
+| File reads (`Read`) | 1 |
+| File edits (`Edit`) | 3 |
+| Command executions (`PowerShell`) | 5 |
+| **Assignment-defined tool calls** | **9** |
+| Code searches (`Grep`) | 2 |
+| Planning calls | 1 |
+| Session wrap-up calls | 1 |
+| Total tool-use events | 13 |
+
+Assignment-defined tool calls include file reads, file edits, and command executions. Grep and session-management calls are recorded separately.
+
+### Token usage
+
+| Measurement | Tokens |
+|---|---:|
+| Input tokens, including cache usage | 681,529 |
+| Output tokens | 4,083 |
+| Combined input and output | 685,612 |
+
+Monetary cost was not reported in the transcript.
+
+### Execution time
+
+| Measurement | Value |
+|---|---|
+| Prompt timestamp | 17:04:21 IST |
+| Final response timestamp | 17:05:50 IST |
+| Elapsed time | Approximately 1.49 minutes |
+
+Elapsed time is calculated from the prompt and final-response timestamps in the transcript.
+
+## 8. Agent Output
+
+The agent reported that the generator exhaustion issue was fixed.
+
+The implementation materializes iterators before query construction, allowing the same query to be evaluated across multiple documents and repeated searches.
+
+The agent reported that the full test suite passed with 231 passed and 1 skipped.
+
+No Git commit was created by the agent.
+
+## 9. Independent Evaluation – Completed
+
+### 9.1 Hidden T1 acceptance tests
+
+The private acceptance test suite was executed independently.
+
+Command:
+
+```powershell
+uv run pytest -v "C:\Users\risha\Desktop\AutoSE_Private_Evaluator\evaluator\hidden_tests\test_t1.py"
+```
+
+Results:
+
+| Acceptance test | Result |
+|---|---|
+| Generator search returns all documents | Passed |
+| Repeated evaluation and cached search | Passed |
+| Generator and list query identity | Passed |
+| Existing `one_of()` behaviour | Passed |
+| **Total** | **4/4 Passed** |
+
+Acceptance score:
+
+\[
+\frac{4}{4}\times100 = 100\%
+\]
+
+### 9.2 Original TinyDB regression test suite
+
+The original TinyDB test suite was executed independently.
+
+Command:
+
+```powershell
+uv run py.test -v --cov=tinydb
+```
+
+Results:
+
+| Measurement | Baseline | After agent changes |
+|---|---:|---:|
+| Tests collected | 228 | 232 |
+| Tests passed | 228 | 232 |
+| Tests failed | 0 | 0 |
+| Tests skipped | 0 | 0 |
+| Code coverage | 93% | 94% |
+
+The four additional tests correspond to the four tests added by the agent.
+
+### 9.3 Regression analysis
+
+- Original baseline tests: 228
+- Original baseline tests passing after the agent's changes: 228
+- Additional agent-added tests: 4
+- Regressions identified: 0
+
+All original baseline tests continued to pass.
+
+### 9.4 Acceptance-test score
+
+| Measurement | Result |
+|---|---:|
+| Hidden acceptance tests passed | 4 |
+| Total hidden acceptance tests | 4 |
+| Acceptance score | 100% |
+
+### 9.5 Design-fit evaluation
+
+The solution was evaluated using the three predefined design-fit checks.
+
+| ID | Design-fit check | Score | Evidence |
+|---|---|---:|---|
+| T1-C1 | Does the solution preserve the existing QueryInstance and Query architecture instead of introducing a separate query system? | 1 | Uses the existing `_generate_test()` mechanism; no separate query system introduced |
+| T1-C2 | Does it handle generator inputs without changing the existing behaviour of list, tuple, set and range inputs? | 1 | Materializes iterator inputs only; existing input behaviour is preserved |
+| T1-C3 | Does it preserve query identity and hashing through the existing query and utility mechanisms? | 1 | Retains `freeze(items)` and verifies generator/list query equality and hash consistency |
+| **Total** | **Design-fit score** | **3/3** | **Strong design fit** |
+
+All three predefined design-fit checks were satisfied.
+
+### 9.6 Final run outcome
+
+| Evaluation metric | Final result |
+|---|---:|
+| Hidden acceptance tests | 4/4 |
+| Acceptance score | 100% |
+| Original baseline tests passing | 228/228 |
+| Regressions | 0 |
+| Design fit | 3/3 |
+| Agent execution time | 1.49 minutes |
+| Assignment-defined tool calls | 9 |
+
+**Final outcome: COMPLETE**
+
+The agent successfully implemented the requested fix, passed all hidden acceptance tests, preserved all original baseline tests, and satisfied all three predefined design-fit checks.

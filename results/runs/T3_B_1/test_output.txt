@@ -1,0 +1,126 @@
+# T3_B_1 — Run Notes
+
+## 1. Run Information
+
+- **Task:** T3 — Add Compressed JSON Storage
+- **Condition:** B — Code + Architecture Documentation
+- **Trial:** 1
+- **Agent:** Claude Code
+- **Model:** Claude Opus 5.5 (`claude-opus-5-5`)
+- **Claude Code version:** 2.1.317
+- **Operating system:** Windows 10
+- **Permission mode:** Auto
+- **Working directory:** `experiment/runs/T3_B_1`
+
+The agent read `ARCHITECTURE.md` in its first Bash command.
+
+## 2. Implementation Summary
+
+The agent implemented `CompressedJSONStorage` in `tinydb/storages.py`.
+
+The implementation:
+- Subclasses the existing `Storage` class.
+- Uses Python standard-library gzip and JSON functionality.
+- Supports configurable compression levels and encoding.
+- Exports the class through `tinydb.storages` and the top-level `tinydb` package.
+- Supports integration with TinyDB and CachingMiddleware.
+- Handles access modes, file lifecycle, and corrupted compressed data.
+- Adds 15 tests to `tests/test_storages.py`.
+
+The agent also added a line describing the new storage to `ARCHITECTURE.md`.
+
+## 3. Acceptance Test Results
+
+**Outcome: Partial — 3/4 passed**
+
+| Acceptance scenario | Result |
+|---|---|
+| Compressed storage round trip | Passed |
+| CachingMiddleware integration | Passed |
+| Storage after deletions | Passed |
+| Edge cases and public exports | Failed |
+
+### Failure analysis
+
+The fourth hidden acceptance test failed because the implementation did not reject a file containing ordinary, uncompressed JSON.
+
+The evaluator expected an `OSError` or `ValueError`, but no exception was raised.
+
+This is an acceptance-test failure.
+
+## 4. Regression Test Results
+
+Command:
+
+`uv run pytest -v --cov=tinydb`
+
+| Metric | Result |
+|---|---:|
+| Tests collected | 243 |
+| Passed | 243 |
+| Failed | 0 |
+| Skipped | 0 |
+| Execution time | 4.31 seconds |
+| Total coverage | 93% |
+| `tinydb/storages.py` coverage | 100% |
+
+Original baseline: 228 passed.
+
+No regression was observed in the existing test suite.
+
+## 5. Design Fit Evaluation
+
+| Criterion | Description | Score |
+|---|---|---:|
+| T3-C1 | New storage subclasses the existing abstract Storage class | 1 |
+| T3-C2 | No new third-party dependency is introduced | 1 |
+| T3-C3 | Implementation is in storages.py and exported through the existing public API | 1 |
+| **Total** | | **3/3** |
+
+## 6. Tool Usage
+
+Counted calls:
+
+| Tool | Calls |
+|---|---:|
+| Bash | 8 |
+| Read | 1 |
+| Edit | 1 |
+| **Total** | **10** |
+
+Excluded:
+- Update plan: 3
+- Wrap-up: 1
+
+## 7. Token Usage
+
+Token usage was calculated by summing each unique assistant message ID once.
+
+| Category | Tokens |
+|---|---:|
+| Regular input | 22 |
+| Cache creation input | 39,435 |
+| Cache read input | 838,296 |
+| **Total input** | **877,753** |
+| Output | 9,259 |
+| **Combined input and output** | **887,012** |
+
+## 8. Time Measurement
+
+- Prompt timestamp: 2026-11-05 07:25:16.988 UTC
+- Final response timestamp: 2026-11-05 07:27:51.768 UTC
+- Elapsed time: 154.78 seconds
+- Elapsed time in minutes: 2.58 minutes
+
+## 9. Final Outcome
+
+**Partial completion.**
+
+The agent successfully implemented the compressed storage and passed all 243 regression tests. It also passed three of the four hidden acceptance scenarios.
+
+The remaining issue is the failure to reject plain, uncompressed JSON input.
+
+Design fit: 3/3.
+
+No changes were committed.
+

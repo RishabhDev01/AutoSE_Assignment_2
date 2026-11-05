@@ -1,0 +1,111 @@
+# Run Notes — T2_A_1
+
+## 1. Run Information
+
+| Field | Value |
+|---|---|
+| Run ID | T2_A_1 |
+| Task | T2 – Add a `between()` Query Operation |
+| Condition | A – Code Only |
+| Trial | 1 |
+| Agent | Claude Code |
+| Claude Code Version | 2.1.317 |
+| Model | claude-opus-5-5 |
+| Thinking Level | Medium |
+| Permission Mode | Auto |
+| Operating System | Windows 10 |
+| Execution Time | 1.22 minutes |
+
+## 2. Task Objective
+
+Implement a `between()` query operation that supports:
+
+- Inclusive lower and upper boundaries by default.
+- Exclusive boundary behaviour.
+- Invalid range validation.
+- Handling of incomparable values.
+- Missing fields.
+- Nested queries and logical combinations.
+- Existing query caching and identity mechanisms.
+
+The agent was instructed to implement the feature and ensure that existing tests continued to pass.
+
+## 3. Agent Implementation
+
+The agent implemented the `between()` operation in `tinydb/queries.py`.
+
+The implemented API uses:
+
+`Query().field.between(lower, upper, include_lower=True, include_upper=True)`
+
+The agent also modified test files and added 10 tests covering the new functionality.
+
+Files modified:
+- `tinydb/queries.py`
+- `tests/test_queries.py`
+
+## 4. Acceptance Test Results
+
+| Acceptance Test | Result |
+|---|---|
+| Boundary behaviour | Failed |
+| Query identity and cache | Failed |
+| Nested paths and map | Passed |
+| Query composition and table operations | Failed |
+
+**Initial result: 1/4 passed.**
+
+### Observed Issues
+
+1. The hidden evaluator expected `inclusive=False`, whereas the agent implemented separate `include_lower` and `include_upper` parameters. This caused two failures.
+2. The query composition test expected `remove()` to return documents. TinyDB's existing API returns document IDs, so this assertion needs correction in the evaluator.
+
+The acceptance result is provisional until the evaluator's `remove()` assertion is corrected and the unchanged implementation is retested.
+
+## 5. Regression Test Results
+
+Command executed:
+
+`uv run py.test -v --cov=tinydb`
+
+| Metric | Result |
+|---|---:|
+| Total tests | 238 |
+| Passed | 238 |
+| Failed | 0 |
+| Skipped | 0 |
+| Code coverage | 93% |
+
+The original baseline had 228 passing tests. The updated suite contains 10 additional tests.
+
+No existing regression test failures were observed.
+
+## 6. Design-Fit Evaluation
+
+| ID | Design-fit check | Score |
+|---|---|---:|
+| T2-C1 | Is the new query operation implemented within the existing query architecture in queries.py? | 1 |
+| T2-C2 | Does it reuse the existing query evaluation and composition mechanisms rather than introducing a separate search system? | 1 |
+| T2-C3 | Does it integrate with the existing query caching and identity mechanisms? | 1 |
+| | **Total** | **3/3** |
+
+## 7. Time and Tool Usage
+
+| Metric | Value |
+|---|---:|
+| Execution time | 1.22 minutes |
+| Tool calls | 8 |
+| Input tokens | 527,507 |
+| Output tokens | 4,755 |
+| Combined tokens | 532,262 |
+| Monetary cost | Not reported |
+
+Tool-call count includes Read, Edit and Bash/PowerShell calls, excluding Grep and session-management events.
+
+## 8. Preliminary Outcome
+
+**Outcome: Partial (provisional)**
+
+The implementation passes the original regression suite and demonstrates alignment with the existing query architecture. However, the initial hidden acceptance evaluation exposed an API parameter mismatch and an evaluator assertion that does not match TinyDB's existing `remove()` behaviour.
+
+The evaluator correction and subsequent retest are required before finalizing the acceptance result.

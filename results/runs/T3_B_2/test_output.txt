@@ -1,0 +1,131 @@
+# T3_B_2 — Run Notes
+
+## 1. Run Information
+
+- Task: T3 — Add Gzip-Compressed JSON Storage
+- Condition: B — Code + Architecture Documentation
+- Trial: 2
+- Agent: Claude Code
+- Model: Claude Opus 5.5
+- Claude Code version: 2.1.317
+- Effort: Medium
+- Permission mode: Auto
+- Operating system: Windows 10
+- Session ID: `7f1c715f-0d76-470d-bae6-8d543677e502`
+
+## 2. Experiment Prompt
+
+The agent received the original T3 task requirements, followed by:
+
+"When you are done, make sure the existing tests still pass.
+Read ARCHITECTURE.md before you start."
+
+The transcript confirms that `ARCHITECTURE.md` was read in the first Bash command.
+
+## 3. Implementation Summary
+
+The agent implemented `GzipJSONStorage` in `tinydb/storages.py`.
+
+The implementation:
+- Subclasses the existing `Storage` class.
+- Uses Python's standard-library gzip and JSON functionality.
+- Exports the class through `tinydb.storages` and the top-level `tinydb` package.
+- Supports TinyDB and CachingMiddleware integration.
+- Supports JSON serialization options and encoding.
+- Handles file access modes, directory creation and storage lifecycle.
+- Handles empty files, corrupt gzip data, truncated files and invalid JSON.
+- Adds 20 tests to `tests/test_storages.py`.
+
+No changes were committed.
+
+## 4. Hidden Acceptance Test Results
+
+Command:
+`uv run --with pytest --with pytest-cov python -m pytest "C:\Users\risha\Desktop\AutoSE_Private_Evaluator\evaluator\hidden_tests\test_t3.py" -v`
+
+- Tests: 4
+- Passed: 0
+- Failed: 4
+
+All four tests failed at the initial class lookup.
+
+The evaluator expects the class name `CompressedJSONStorage`, but the agent implemented `GzipJSONStorage`.
+
+The tests therefore did not reach the storage behaviour they were designed to evaluate.
+
+**Acceptance score: 0/4.**
+
+This is recorded as a public API naming mismatch, not as four independently demonstrated storage-behaviour failures.
+
+## 5. Regression Test Results
+
+Command:
+`uv run pytest -v --cov=tinydb`
+
+- Tests collected: 249
+- Passed: 249
+- Failed: 0
+- Skipped: 0
+- Execution time: 4.61 seconds
+- Total coverage: 93%
+- `tinydb/storages.py` coverage: 100%
+
+Original baseline: 228 passed.
+
+Net increase in passing test count: 21.
+
+Observed regressions: 0.
+
+## 6. Design Fit Evaluation
+
+| Criterion | Description | Score |
+|---|---|---:|
+| T3-C1 | New storage subclasses existing abstract Storage class | 1 |
+| T3-C2 | Avoids adding a third-party dependency | 1 |
+| T3-C3 | Implemented in storages.py and exported through the existing public API | 1 |
+| **Total** | | **3/3** |
+
+## 7. Effort and Usage Metrics
+
+### Elapsed Time
+
+- Start: 2026-11-05 07:39:23.193 UTC
+- Final response: 2026-11-05 07:41:06.376 UTC
+- Elapsed time: 103.18 seconds
+- Elapsed time in minutes: 1.72 minutes
+
+### Tool Calls
+
+| Tool | Count |
+|---|---:|
+| Bash | 6 |
+| Read | 1 |
+| Edit | 1 |
+| **Total counted** | **8** |
+
+Planning calls (4) and wrap-up call (1) excluded.
+
+### Token Usage
+
+| Token category | Count |
+|---|---:|
+| Regular input tokens | 18 |
+| Cache creation input tokens | 41,774 |
+| Cache read input tokens | 670,952 |
+| **Total input tokens** | **712,744** |
+| Output tokens | 8,442 |
+| **Combined tokens** | **721,186** |
+
+Token usage was calculated by summing unique assistant message IDs once.
+
+## 8. Final Outcome
+
+**Failed**
+
+The agent implemented a gzip-compressed JSON storage, read the architecture documentation, passed all 249 regression tests and achieved 3/3 design-fit points.
+
+However, all four hidden acceptance tests failed because the implementation exposes `GzipJSONStorage` instead of the evaluator's expected `CompressedJSONStorage`.
+
+The hidden tests failed at class lookup, so the actual storage behaviour was not evaluated by those tests.
+
+No changes were committed.

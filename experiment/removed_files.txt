@@ -1,0 +1,39 @@
+# Files and directories removed from repository/ (paths relative to repository root)
+# Commit: edff96aeb2616402e9489d46e90a592c05565621
+# Removed: 2026-11-04T07:46:23Z
+# Directories (trailing /):
+docs/
+docs/_static/
+docs/_templates/
+docs/_themes/
+docs/_themes/flask/
+docs/_themes/flask/static/
+# Files:
+docs/.gitignore
+docs/Makefile
+docs/_static/architecture.mmd
+docs/_static/architecture.svg
+docs/_static/logo.png
+docs/_templates/links.html
+docs/_templates/sidebarlogo.html
+docs/_themes/.gitignore
+docs/_themes/LICENSE
+docs/_themes/README
+docs/_themes/flask/layout.html
+docs/_themes/flask/page.html
+docs/_themes/flask/relations.html
+docs/_themes/flask/static/flasky.css_t
+docs/_themes/flask/theme.conf
+docs/_themes/flask_theme_support.py
+docs/api.rst
+docs/changelog.rst
+docs/conf.py
+docs/contribute.rst
+docs/extend.rst
+docs/extensions.rst
+docs/getting-started.rst
+docs/index.rst
+docs/intro.rst
+docs/make.bat
+docs/upgrade.rst
+docs/usage.rst
