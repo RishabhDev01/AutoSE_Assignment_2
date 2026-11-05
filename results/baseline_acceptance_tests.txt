@@ -1,0 +1,47 @@
+﻿# Baseline Acceptance Test Results
+
+## Environment
+- Repository: Original TinyDB prepared snapshot
+- Python: 3.14.7
+- Pytest: 9.1.1
+- Evaluator: AutoSE private evaluator
+- Test files: test_t1.py, test_t2.py, test_t3.py
+
+## Summary
+
+| Task | Passed | Failed | Total |
+|------|--------|--------|-------|
+| T1 - Generator exhaustion | 1 | 3 | 4 |
+| T2 - between() query | 0 | 4 | 4 |
+| T3 - Compressed JSON storage | 0 | 4 | 4 |
+| Total | 1 | 11 | 12 |
+
+## T1 - Generator exhaustion
+- 3 failed, 1 passed.
+- Generator-based one_of() search returned incomplete results.
+- Repeated query evaluation failed because the generator was exhausted.
+- Generator-based and list-based query identity did not match.
+- Existing one_of() behaviour passed.
+
+## T2 - between() query
+- 4 failed, 0 passed.
+- The original implementation did not support the requested between() operation.
+- Tests failed with TypeError when calling Q.x.between(1, 3).
+
+## T3 - Compressed JSON storage
+- 4 failed, 0 passed.
+- The original implementation did not expose CompressedJSONStorage.
+- Tests failed with AttributeError when attempting to import the class.
+
+## Interpretation
+The original TinyDB snapshot did not satisfy the acceptance criteria for these three tasks. T1 had one passing test for existing behaviour, while T2 and T3 had no passing tests.
+
+These results provide the acceptance-test baseline against which the agent runs were evaluated.
+
+## Evidence
+Results were taken from the original evaluator output files:
+- baseline_t1.txt
+- baseline_t2.txt
+- baseline_t3.txt
+
+The original evaluator output files were retained separately.
